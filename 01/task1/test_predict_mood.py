@@ -10,7 +10,7 @@ class TestPredictMood(unittest.TestCase):
     def tearDown(self) -> None:
         pass
 
-    def test_predict(self):
+    def test_predict(self) -> None:
         message = "Test msg"
         with mock.patch("predict_mood.SomeModel.predict") as mock_predict:
             mock_predict.return_value = 0.7
@@ -18,21 +18,21 @@ class TestPredictMood(unittest.TestCase):
             mock_predict.assert_called_once_with(message)
             self.assertEqual(prediction, 0.7)
 
-    def test_predict_msg_argument(self):
+    def test_predict_msg_argument(self) -> None:
         message = "Test msg"
         with mock.patch("predict_mood.SomeModel.predict") as mock_predict:
             mock_predict.return_value = 0.6
             predict_message_mood(message, self.model)
             mock_predict.assert_called_with(message)
 
-    def test_predict_called_once(self):
+    def test_predict_called_once(self) -> None:
         message = "Test msg"
         with mock.patch("predict_mood.SomeModel.predict") as mock_predict:
             mock_predict.return_value = 0.3
             predict_message_mood(message, self.model)
             mock_predict.assert_called_once()
 
-    def test_predict_message_mood(self):
+    def test_predict_message_mood(self) -> None:
         with mock.patch("predict_mood.SomeModel.predict") as mock_predict:
             mock_predict.return_value = 0.2
             prediction = predict_message_mood("Test msg", self.model)
@@ -65,7 +65,7 @@ class TestPredictMood(unittest.TestCase):
             )
             self.assertEqual(prediction, "норм")
 
-    def test_predict_message_mood_custom_thresholds(self):
+    def test_predict_message_mood_custom_thresholds(self) -> None:
         with mock.patch("predict_mood.SomeModel.predict") as mock_predict:
             mock_predict.return_value = 0.4
             prediction = predict_message_mood(
@@ -87,7 +87,7 @@ class TestPredictMood(unittest.TestCase):
             )
             self.assertEqual(prediction, "отл")
 
-    def test_predict_message_mood_if_error(self):
+    def test_predict_message_mood_if_error(self) -> None:
         with mock.patch("predict_mood.SomeModel.predict") as mock_predict:
             mock_predict.side_effect = 0.5
             with self.assertRaises(ValueError) as err:
