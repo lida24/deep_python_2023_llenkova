@@ -4,6 +4,6 @@ generator.py              19      0   100%
 predict_mood.py           10      0   100%
 some_model.py              4      0   100%
 test_generator.py         52      0   100%
-test_predict_mood.py     134      0   100%
+test_predict_mood.py     147      0   100%
 ------------------------------------------
-TOTAL                    219      0   100%
+TOTAL                    232      0   100%

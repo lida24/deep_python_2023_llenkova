@@ -125,6 +125,81 @@ class TestPredictMood(unittest.TestCase):
 
     def test_predict_message_mood_with_extreme_values(self) -> None:
         with mock.patch("some_model.SomeModel.predict") as mock_predict:
+            mock_predict.return_value = 0.88888888
+            prediction = predict_message_mood(
+                self.message,
+                self.model,
+                bad_thresholds=0.8888888,
+                good_thresholds=0.88888889,
+            )
+            self.assertEqual(prediction, "норм")
+
+        with mock.patch("some_model.SomeModel.predict") as mock_predict:
+            mock_predict.return_value = 0.9
+            prediction = predict_message_mood(
+                self.message,
+                self.model,
+                bad_thresholds=0.9999998,
+                good_thresholds=0.9999999,
+            )
+            self.assertEqual(prediction, "неуд")
+
+        with mock.patch("some_model.SomeModel.predict") as mock_predict:
+            mock_predict.return_value = 1
+            prediction = predict_message_mood(
+                self.message,
+                self.model,
+                bad_thresholds=0.9999998,
+                good_thresholds=0.9999999,
+            )
+            self.assertEqual(prediction, "отл")
+
+        with mock.patch("some_model.SomeModel.predict") as mock_predict:
+            mock_predict.return_value = 0.00001
+            prediction = predict_message_mood(
+                self.message,
+                self.model,
+                bad_thresholds=0.0000001,
+                good_thresholds=0.9999999,
+            )
+            self.assertEqual(prediction, "норм")
+
+        with mock.patch("some_model.SomeModel.predict") as mock_predict:
+            mock_predict.return_value = 0.98
+            prediction = predict_message_mood(
+                self.message,
+                self.model,
+                bad_thresholds=0.0000001,
+                good_thresholds=0.9999999,
+            )
+            self.assertEqual(prediction, "норм")
+
+        with mock.patch("some_model.SomeModel.predict") as mock_predict:
+            mock_predict.return_value = 0.98
+            prediction = predict_message_mood(
+                self.message,
+                self.model,
+                bad_thresholds=0.9000001,
+                good_thresholds=0.9999999,
+            )
+            self.assertEqual(prediction, "норм")
+
+    def test_predict_message_mood_with_close_values(self) -> None:
+        with mock.patch("some_model.SomeModel.predict") as mock_predict:
+            mock_predict.return_value = 0.0000001
+            prediction = predict_message_mood(
+                self.message, self.model, bad_thresholds=0.0002, good_thresholds=0.0003
+            )
+            self.assertEqual(prediction, "неуд")
+
+        with mock.patch("some_model.SomeModel.predict") as mock_predict:
+            mock_predict.return_value = 0.000000001
+            prediction = predict_message_mood(
+                self.message, self.model, bad_thresholds=0.0002, good_thresholds=0.0003
+            )
+            self.assertEqual(prediction, "неуд")
+
+        with mock.patch("some_model.SomeModel.predict") as mock_predict:
             mock_predict.return_value = 0.0002
             prediction = predict_message_mood(
                 self.message, self.model, bad_thresholds=0.0002, good_thresholds=0.0003
@@ -156,49 +231,5 @@ class TestPredictMood(unittest.TestCase):
             mock_predict.return_value = 0.004
             prediction = predict_message_mood(
                 self.message, self.model, bad_thresholds=0.0002, good_thresholds=0.0003
-            )
-            self.assertEqual(prediction, "отл")
-
-        with mock.patch("some_model.SomeModel.predict") as mock_predict:
-            mock_predict.return_value = 0.0000001
-            prediction = predict_message_mood(
-                self.message, self.model, bad_thresholds=0.0002, good_thresholds=0.0003
-            )
-            self.assertEqual(prediction, "неуд")
-
-        with mock.patch("some_model.SomeModel.predict") as mock_predict:
-            mock_predict.return_value = 0.000000001
-            prediction = predict_message_mood(
-                self.message, self.model, bad_thresholds=0.0002, good_thresholds=0.0003
-            )
-            self.assertEqual(prediction, "неуд")
-
-        with mock.patch("some_model.SomeModel.predict") as mock_predict:
-            mock_predict.return_value = 0.88888888
-            prediction = predict_message_mood(
-                self.message,
-                self.model,
-                bad_thresholds=0.8888888,
-                good_thresholds=0.88888889,
-            )
-            self.assertEqual(prediction, "норм")
-
-        with mock.patch("some_model.SomeModel.predict") as mock_predict:
-            mock_predict.return_value = 0.9
-            prediction = predict_message_mood(
-                self.message,
-                self.model,
-                bad_thresholds=0.9999998,
-                good_thresholds=0.9999999,
-            )
-            self.assertEqual(prediction, "неуд")
-
-        with mock.patch("some_model.SomeModel.predict") as mock_predict:
-            mock_predict.return_value = 1
-            prediction = predict_message_mood(
-                self.message,
-                self.model,
-                bad_thresholds=0.9999998,
-                good_thresholds=0.9999999,
             )
             self.assertEqual(prediction, "отл")
