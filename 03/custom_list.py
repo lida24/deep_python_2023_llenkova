@@ -26,13 +26,13 @@ class CustomList(list):
         if isinstance(other, (CustomList, list)):
             length = max(len(self), len(other))
             self[:] = [
-                    self[i] + other[i]
-                    if i < len(self) and i < len(other)
-                    else self[i]
-                    if i < len(self)
-                    else other[i]
-                    for i in range(length)
-                ]
+                self[i] + other[i]
+                if i < len(self) and i < len(other)
+                else self[i]
+                if i < len(self)
+                else other[i]
+                for i in range(length)
+            ]
         else:
             self[:] = [element + other for element in self]
         return self
