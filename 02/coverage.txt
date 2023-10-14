@@ -1,8 +1,8 @@
 Name                 Stmts   Miss  Cover
 ----------------------------------------
 mean_time.py            24      0   100%
-parse_json.py           21      0   100%
-test_mean_time.py      101      0   100%
-test_parse_json.py      85      0   100%
+parse_json.py           17      1    94%
+test_mean_time.py       83      0   100%
+test_parse_json.py     160      0   100%
 ----------------------------------------
-TOTAL                  231      0   100%
+TOTAL                  284      1    99%

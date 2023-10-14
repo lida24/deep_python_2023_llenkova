@@ -12,7 +12,7 @@ def mean(last_k_calls):
 
         def inner(*args, **kwargs):
             start_ts = time.time()
-            func(*args, **kwargs)
+            result = func(*args, **kwargs)
             end_ts = time.time()
             call_duration = end_ts - start_ts
             call_durations.append(call_duration)
@@ -23,7 +23,7 @@ def mean(last_k_calls):
                 print(
                     f"Mean time of last {last_k_calls} calls: {mean_call_duration:.9f} seconds"
                 )
-            return mean_call_duration
+            return result
 
         return inner
 

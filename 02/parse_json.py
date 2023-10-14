@@ -1,15 +1,8 @@
 import json
 
 
-counter = {}
-
-
-def keywords_counter(keyword):
-    if keyword not in counter:
-        counter[keyword] = 1
-    else:
-        counter[keyword] += 1
-    return counter
+def keywords_counter(required_field, keyword):
+    pass
 
 
 def parse_json(
@@ -27,4 +20,4 @@ def parse_json(
             keywords_list = json_doc[field].split()
             for keyword in set(keywords):
                 if keyword.lower() in [kw.lower() for kw in keywords_list]:
-                    keyword_callback(keyword)
+                    keyword_callback(field, keyword)
