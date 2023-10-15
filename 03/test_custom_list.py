@@ -13,62 +13,62 @@ class TestCustomList(unittest.TestCase):
         custom_list_1 = CustomList([5, 1, 3, 7])
         custom_list_2 = CustomList([1, 2, 7])
         self.assertEqual(list(custom_list_1 + custom_list_2), [6, 3, 10, 7])
-        self.assertEqual(custom_list_1, CustomList([5, 1, 3, 7]))
-        self.assertEqual(custom_list_2, CustomList([1, 2, 7]))
+        self.assertEqual(list(custom_list_1), [5, 1, 3, 7])
+        self.assertEqual(list(custom_list_2), [1, 2, 7])
 
         custom_list_3 = CustomList([])
         self.assertEqual(list(custom_list_3 + []), [])
-        self.assertEqual(custom_list_3, CustomList([]))
+        self.assertEqual(list(custom_list_3), [])
 
         custom_list_4 = CustomList([2, 5])
         self.assertEqual(list(custom_list_1 + custom_list_4), [7, 6, 3, 7])
-        self.assertEqual(custom_list_4, CustomList([2, 5]))
+        self.assertEqual(list(custom_list_4), [2, 5])
 
         self.assertEqual(list(custom_list_3 + [2, 5]), [2, 5])
-        self.assertEqual(custom_list_3, CustomList([]))
+        self.assertEqual(list(custom_list_3), [])
 
         custom_list_5 = CustomList([2, 9, 15, 84, 9, -3])
         self.assertEqual(
             list(custom_list_5 + custom_list_1),
             [7, 10, 18, 91, 9, -3],
         )
-        self.assertEqual(custom_list_1, CustomList([5, 1, 3, 7]))
-        self.assertEqual(custom_list_5, CustomList([2, 9, 15, 84, 9, -3]))
+        self.assertEqual(list(custom_list_1), [5, 1, 3, 7])
+        self.assertEqual(list(custom_list_5), [2, 9, 15, 84, 9, -3])
 
     def test_radd(self) -> None:
         custom_list_1 = CustomList([5, 1, 3, 7])
         self.assertEqual(list([3, 8, -19, 6, 15] + custom_list_1), [8, 9, -16, 13, 15])
-        self.assertEqual(custom_list_1, CustomList([5, 1, 3, 7]))
+        self.assertEqual(list(custom_list_1), [5, 1, 3, 7])
 
         self.assertEqual(list([5] + custom_list_1), [10, 1, 3, 7])
-        self.assertEqual(custom_list_1, CustomList([5, 1, 3, 7]))
+        self.assertEqual(list(custom_list_1), [5, 1, 3, 7])
 
         self.assertEqual(list([] + custom_list_1), [5, 1, 3, 7])
-        self.assertEqual(custom_list_1, CustomList([5, 1, 3, 7]))
+        self.assertEqual(list(custom_list_1), [5, 1, 3, 7])
 
     def test_sub(self):
         custom_list_1 = CustomList([5, 1, 3, 7])
         custom_list_2 = CustomList([1, 2, 7])
         self.assertEqual(list(custom_list_1 - custom_list_2), [4, -1, -4, 7])
-        self.assertEqual(custom_list_1, CustomList([5, 1, 3, 7]))
-        self.assertEqual(custom_list_2, CustomList([1, 2, 7]))
+        self.assertEqual(list(custom_list_1), [5, 1, 3, 7])
+        self.assertEqual(list(custom_list_2), [1, 2, 7])
 
         custom_list_3 = CustomList([2, 5])
         self.assertEqual(list(custom_list_1 - custom_list_3), [3, -4, 3, 7])
-        self.assertEqual(custom_list_1, CustomList([5, 1, 3, 7]))
-        self.assertEqual(custom_list_3, CustomList([2, 5]))
+        self.assertEqual(list(custom_list_1), [5, 1, 3, 7])
+        self.assertEqual(list(custom_list_3), [2, 5])
 
         custom_list_4 = CustomList([1])
         self.assertEqual(list(custom_list_4 - custom_list_1), [-4, -1, -3, -7])
-        self.assertEqual(custom_list_1, CustomList([5, 1, 3, 7]))
-        self.assertEqual(custom_list_4, CustomList([1]))
+        self.assertEqual(list(custom_list_1), CustomList([5, 1, 3, 7]))
+        self.assertEqual(list(custom_list_4), [1])
 
         custom_list_5 = CustomList([])
         self.assertEqual(list(custom_list_5 - [3, 9, 1]), [-3, -9, -1])
-        self.assertEqual(custom_list_5, CustomList([]))
+        self.assertEqual(list(custom_list_5), [])
 
         self.assertEqual(list(custom_list_5 - []), [])
-        self.assertEqual(custom_list_5, CustomList([]))
+        self.assertEqual(list(custom_list_5), [])
 
     def test_rsub(self) -> None:
         custom_list_1 = CustomList([5, 1, 3, 7])
@@ -76,16 +76,16 @@ class TestCustomList(unittest.TestCase):
             list([0, -13, 21, 105, 8, 63] - custom_list_1),
             [-5, -14, 18, 98, 8, 63],
         )
-        self.assertEqual(custom_list_1, CustomList([5, 1, 3, 7]))
+        self.assertEqual(list(custom_list_1), [5, 1, 3, 7])
 
         self.assertEqual(list([3, 8] - custom_list_1), [-2, 7, -3, -7])
-        self.assertEqual(custom_list_1, CustomList([5, 1, 3, 7]))
+        self.assertEqual(list(custom_list_1), [5, 1, 3, 7])
 
         self.assertEqual(list([4] - custom_list_1), [-1, -1, -3, -7])
-        self.assertEqual(custom_list_1, CustomList([5, 1, 3, 7]))
+        self.assertEqual(list(custom_list_1), [5, 1, 3, 7])
 
         self.assertEqual(list([] - custom_list_1), [-5, -1, -3, -7])
-        self.assertEqual(custom_list_1, CustomList([5, 1, 3, 7]))
+        self.assertEqual(list(custom_list_1), [5, 1, 3, 7])
 
     def test_eq(self) -> None:
         self.assertTrue(CustomList([7, 5, 3]) == CustomList([4, 5, 6]))
