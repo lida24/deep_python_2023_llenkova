@@ -15,12 +15,16 @@ class TestMetaclass(unittest.TestCase):
     def test_default_x(self) -> None:
         with self.assertRaises(AttributeError) as err:
             self.inst.x
-        self.assertEqual("'CustomClass' object has no attribute 'x'", str(err.exception))
+        self.assertEqual(
+            "'CustomClass' object has no attribute 'x'", str(err.exception)
+        )
         self.assertEqual(AttributeError, type(err.exception))
 
         with self.assertRaises(AttributeError) as err:
             CustomClass.x
-        self.assertEqual("type object 'CustomClass' has no attribute 'x'", str(err.exception))
+        self.assertEqual(
+            "type object 'CustomClass' has no attribute 'x'", str(err.exception)
+        )
         self.assertEqual(AttributeError, type(err.exception))
 
     def test_custom_val(self) -> None:
@@ -35,19 +39,25 @@ class TestMetaclass(unittest.TestCase):
     def test_default_val(self) -> None:
         with self.assertRaises(AttributeError) as err:
             self.inst.val
-        self.assertEqual("'CustomClass' object has no attribute 'val'", str(err.exception))
+        self.assertEqual(
+            "'CustomClass' object has no attribute 'val'", str(err.exception)
+        )
         self.assertEqual(AttributeError, type(err.exception))
 
     def test_default_line(self) -> None:
         with self.assertRaises(AttributeError) as err:
             self.inst.line()
-        self.assertEqual("'CustomClass' object has no attribute 'line'", str(err.exception))
+        self.assertEqual(
+            "'CustomClass' object has no attribute 'line'", str(err.exception)
+        )
         self.assertEqual(AttributeError, type(err.exception))
 
     def test_random_attribute(self) -> None:
         with self.assertRaises(AttributeError) as err:
             self.inst.yyy
-        self.assertEqual("'CustomClass' object has no attribute 'yyy'", str(err.exception))
+        self.assertEqual(
+            "'CustomClass' object has no attribute 'yyy'", str(err.exception)
+        )
         self.assertEqual(AttributeError, type(err.exception))
 
     def test_dynamic_attribute(self) -> None:
@@ -56,5 +66,7 @@ class TestMetaclass(unittest.TestCase):
 
         with self.assertRaises(AttributeError) as err:
             self.inst.dynamic
-        self.assertEqual("'CustomClass' object has no attribute 'dynamic'", str(err.exception))
+        self.assertEqual(
+            "'CustomClass' object has no attribute 'dynamic'", str(err.exception)
+        )
         self.assertEqual(AttributeError, type(err.exception))

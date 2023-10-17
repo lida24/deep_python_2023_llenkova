@@ -6,7 +6,7 @@ def get_custom_name(name, obj=None):
             custom_name = f"_{obj.__class__.__name__}__custom_{name[2:]}"
         else:
             custom_name = f"_{type.__name__}__custom_{name[2:]}"
-    elif name.startswith('_'):
+    elif name.startswith("_"):
         custom_name = f"_custom_{name[1:]}"
     else:
         custom_name = f"custom_{name}"
