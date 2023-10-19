@@ -23,16 +23,6 @@ class CustomMeta(type):
         custom_attrs["__setattr__"] = mcs.__setattr__
         return super().__new__(mcs, name, bases, custom_attrs)
 
-    def __init__(cls, name, bases, attrs, **extra_kwargs):
-        super().__init__(name, bases, attrs, **extra_kwargs)
-
-    @classmethod
-    def __prepare__(mcs, name, bases, **extra_kwargs):
-        return super().__prepare__(mcs, name, bases, **extra_kwargs)
-
-    def __call__(cls, *args, **kwargs):
-        return super().__call__(*args, **kwargs)
-
 
 class CustomClass(metaclass=CustomMeta):
     x = 50

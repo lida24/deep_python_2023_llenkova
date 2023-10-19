@@ -57,11 +57,13 @@ class TestDescriptors(unittest.TestCase):
             "Incorrect color, can only be white or black", str(err.exception)
         )
         self.assertEqual(ValueError, type(err.exception))
+        self.assertEqual(self.move_2.color, "black")
 
         with self.assertRaises(ValueError) as err:
             self.move_2.piece = "Chicken"
         self.assertEqual("There is no such piece in chess", str(err.exception))
         self.assertEqual(ValueError, type(err.exception))
+        self.assertEqual(self.move_2.piece, "Pawn")
 
         with self.assertRaises(ValueError) as err:
             self.move_1.coord = "i15"
@@ -70,3 +72,4 @@ class TestDescriptors(unittest.TestCase):
             str(err.exception),
         )
         self.assertEqual(ValueError, type(err.exception))
+        self.assertEqual(self.move_1.coord, "c3")

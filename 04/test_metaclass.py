@@ -70,3 +70,6 @@ class TestMetaclass(unittest.TestCase):
             "'CustomClass' object has no attribute 'dynamic'", str(err.exception)
         )
         self.assertEqual(AttributeError, type(err.exception))
+
+    def test_custom_class_attribute(self) -> None:
+        self.assertEqual(CustomClass.custom_x, 50)
