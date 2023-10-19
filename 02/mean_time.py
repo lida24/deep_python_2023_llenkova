@@ -32,3 +32,8 @@ def mean(last_k_calls):
 
 def foo(arg1):
     return arg1
+
+
+decorated_foo = mean(5)(foo)
+print(decorated_foo)
+result = decorated_foo(5)
