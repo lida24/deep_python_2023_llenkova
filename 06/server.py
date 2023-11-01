@@ -1,7 +1,7 @@
 import socket
 
 sock = socket.socket()
-sock.bind(('127.0.0.1', 8000))
+sock.bind((socket.gethostname(), 8000))
 sock.listen(1)
 conn, addr = sock.accept()
 print('connected: ', addr)
@@ -10,4 +10,5 @@ while True:
     if not data:
         break
     conn.send(data.upper())
+    print(data)
 conn.close()
