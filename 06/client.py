@@ -1,17 +1,49 @@
 import socket
 import argparse
+from queue import Queue
+import threading
 
 
 class Client:
-    def __init__(self):
-        pass
+    def __init__(self, file, number_of_threads):
+        self.host = socket.gethostname()
+        self.port = 8000
+        self.urls = self.get_urls(file)
+        self.number_of_threads = number_of_threads
+        self.start_event = threading.Event()
 
-    def get_urls(self):
-        pass
+    @staticmethod
+    def get_urls(file):
+        queue_of_urls = Queue()
+        with open(file, 'r') as file:
+            for line in file:
+                queue_of_urls.put(line.strip())
+        return queue_of_urls
+
+    def send_requests(self):
+        sock = socket.socket()
+        sock.connect((self.host, self.port))
+        self.start_event.wait()
+        while not self.urls.empty():
+            url = self.urls.get()
+            sock.send(url.encode())
+            data = sock.recv(4096)
+            print(data)
+
+    def run(self):
+        client_threads = [threading.Thread(target=self.send_requests) for _ in range(self.number_of_threads)]
+        for thread in client_threads:
+            thread.start()
+
+        self.start_event.set()
+
+        for thread in client_threads:
+            thread.join()
 
 
 def create_parser():
     parser = argparse.ArgumentParser()
+    parser.add_argument('threads', type=int)
     parser.add_argument('urls_file')
     return parser
 
@@ -21,13 +53,10 @@ if __name__ == '__main__':
     # print(parse_arg)
     args = input_parser.parse_args()
     urls_file = args.urls_file
-    sock = socket.socket()
-    sock.connect((socket.gethostname(), 8000))
-    with open(urls_file, 'r') as file:
-        for url in file:
-            print(url)
-            sock.send(url.encode())
-            data = sock.recv(1024)
-            print(data)
-    sock.close()
+    threads = args.threads
+    client = Client(urls_file, threads)
+    client.run()
+
+
+
 
