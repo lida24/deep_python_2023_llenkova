@@ -7,10 +7,9 @@ import threading
 class Client:
     def __init__(self, file, number_of_threads):
         self.host = socket.gethostname()
-        self.port = 8000
+        self.port = 8080
         self.urls = self.get_urls(file)
         self.number_of_threads = number_of_threads
-        self.start_event = threading.Event()
 
     @staticmethod
     def get_urls(file):
@@ -23,19 +22,16 @@ class Client:
     def send_requests(self):
         sock = socket.socket()
         sock.connect((self.host, self.port))
-        self.start_event.wait()
-        while not self.urls.empty():
+        while True:
             url = self.urls.get()
             sock.send(url.encode())
-            data = sock.recv(4096)
+            data = sock.recv(4096).decode()
             print(data)
 
     def run(self):
         client_threads = [threading.Thread(target=self.send_requests) for _ in range(self.number_of_threads)]
         for thread in client_threads:
             thread.start()
-
-        self.start_event.set()
 
         for thread in client_threads:
             thread.join()
@@ -50,13 +46,8 @@ def create_parser():
 
 if __name__ == '__main__':
     input_parser = create_parser()
-    # print(parse_arg)
     args = input_parser.parse_args()
     urls_file = args.urls_file
     threads = args.threads
     client = Client(urls_file, threads)
     client.run()
-
-
-
-
