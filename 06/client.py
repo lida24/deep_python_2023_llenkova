@@ -1,44 +1,39 @@
 import socket
 import argparse
-from queue import Queue
 import threading
 
 
 class Client:
     def __init__(self, file, number_of_threads):
-        self.host = socket.gethostname()
-        self.port = 8000
-        self.urls = self.get_urls(file)
+        self.server_host = socket.gethostname()
+        self.server_port = 8000
+        self.urls = self.load_urls(file)
         self.number_of_threads = number_of_threads
-        self.start_event = threading.Event()
+        self.threads = []
 
     @staticmethod
-    def get_urls(file):
-        queue_of_urls = Queue()
-        with open(file, 'r') as file:
-            for line in file:
-                queue_of_urls.put(line.strip())
-        return queue_of_urls
-
-    def send_requests(self):
-        sock = socket.socket()
-        sock.connect((self.host, self.port))
-        self.start_event.wait()
-        while not self.urls.empty():
-            url = self.urls.get()
-            sock.send(url.encode())
-            data = sock.recv(4096)
-            print(data)
+    def load_urls(file_name):
+        with open(file_name, 'r') as file:
+            urls = file.read().splitlines()
+        return urls
 
     def run(self):
-        client_threads = [threading.Thread(target=self.send_requests) for _ in range(self.number_of_threads)]
-        for thread in client_threads:
+        for _ in range(self.number_of_threads):
+            thread = threading.Thread(target=self.send_request)
+            self.threads.append(thread)
             thread.start()
 
-        self.start_event.set()
-
-        for thread in client_threads:
+        for thread in self.threads:
             thread.join()
+
+    def send_request(self):
+        client_socket = socket.socket()
+        client_socket.connect((self.server_host, self.server_port))
+        while self.urls:
+            url = self.urls.pop(0)
+            client_socket.send(url.encode())
+            data = client_socket.recv(4096).decode()
+            print(data)
 
 
 def create_parser():
@@ -56,7 +51,3 @@ if __name__ == '__main__':
     threads = args.threads
     client = Client(urls_file, threads)
     client.run()
-
-
-
-
