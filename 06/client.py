@@ -1,39 +1,40 @@
 import socket
 import argparse
+from queue import Queue
 import threading
 
 
 class Client:
     def __init__(self, file, number_of_threads):
-        self.server_host = socket.gethostname()
-        self.server_port = 8000
-        self.urls = self.load_urls(file)
+        self.host = socket.gethostname()
+        self.port = 8080
+        self.urls = self.get_urls(file)
         self.number_of_threads = number_of_threads
-        self.threads = []
 
     @staticmethod
-    def load_urls(file_name):
-        with open(file_name, 'r') as file:
-            urls = file.read().splitlines()
-        return urls
+    def get_urls(file):
+        queue_of_urls = Queue()
+        with open(file, 'r') as file:
+            for line in file:
+                queue_of_urls.put(line.strip())
+        return queue_of_urls
+
+    def send_requests(self):
+        sock = socket.socket()
+        sock.connect((self.host, self.port))
+        while True:
+            url = self.urls.get()
+            sock.send(url.encode())
+            data = sock.recv(4096).decode()
+            print(data)
 
     def run(self):
-        for _ in range(self.number_of_threads):
-            thread = threading.Thread(target=self.send_request)
-            self.threads.append(thread)
+        client_threads = [threading.Thread(target=self.send_requests) for _ in range(self.number_of_threads)]
+        for thread in client_threads:
             thread.start()
 
-        for thread in self.threads:
+        for thread in client_threads:
             thread.join()
-
-    def send_request(self):
-        client_socket = socket.socket()
-        client_socket.connect((self.server_host, self.server_port))
-        while self.urls:
-            url = self.urls.pop(0)
-            client_socket.send(url.encode())
-            data = client_socket.recv(4096).decode()
-            print(data)
 
 
 def create_parser():
@@ -45,7 +46,6 @@ def create_parser():
 
 if __name__ == '__main__':
     input_parser = create_parser()
-    # print(parse_arg)
     args = input_parser.parse_args()
     urls_file = args.urls_file
     threads = args.threads
