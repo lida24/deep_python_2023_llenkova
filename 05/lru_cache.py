@@ -51,6 +51,8 @@ class ListNode:
 
 class LRUCache:
     def __init__(self, limit=42):
+        if limit <= 0:
+            raise ValueError("Limit must be a positive integer")
         self.limit = limit
         self.keys = {}
         self.values = ListNode()
@@ -63,16 +65,15 @@ class LRUCache:
         return None
 
     def set(self, key, value):
-        if self.limit:
-            if key not in self.keys and len(self.keys) >= self.limit:
-                tail = self.values.pop_tail()
-                if tail is not None:
-                    del self.keys[tail.key]
-            if key in self.keys:
-                node = self.keys[key]
-                node.value = value
-            else:
-                new_node = Node(key, value)
-                self.values.add(new_node)
-                self.keys[key] = new_node
-            self.values.move_to_head(self.keys[key])
+        if key not in self.keys and len(self.keys) >= self.limit:
+            tail = self.values.pop_tail()
+            if tail is not None:
+                del self.keys[tail.key]
+        if key in self.keys:
+            node = self.keys[key]
+            node.value = value
+        else:
+            new_node = Node(key, value)
+            self.values.add(new_node)
+            self.keys[key] = new_node
+        self.values.move_to_head(self.keys[key])

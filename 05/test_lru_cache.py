@@ -110,6 +110,30 @@ class TestLRUCache(unittest.TestCase):
         self.assertEqual(cache.get("k3"), "val3")
 
     def test_cache_is_empty(self) -> None:
-        cache = LRUCache(0)
+        with self.assertRaises(ValueError) as err:
+            cache = LRUCache(0)
+            cache.set("k1", "val1")
+            self.assertIsNone(cache.get("k1"))
+        self.assertEqual(
+            "Limit must be a positive integer",
+            str(err.exception),
+        )
+        self.assertEqual(ValueError, type(err.exception))
+
+    def test_limit_equal_one(self) -> None:
+        cache = LRUCache(1)
         cache.set("k1", "val1")
+        self.assertEqual(cache.get("k1"), "val1")
+        cache.set("k2", "val2")
         self.assertIsNone(cache.get("k1"))
+        self.assertEqual(cache.get("k2"), "val2")
+
+    def test_update_value_with_existing_key_and_consequences(self) -> None:
+        cache = LRUCache(2)
+        cache.set("k1", "val1")
+        cache.set("k2", "val2")
+        cache.set("k1", "new_val1")
+        cache.set("k3", "val3")
+        self.assertEqual(cache.get("k1"), "new_val1")
+        self.assertIsNone(cache.get("k2"))
+        self.assertEqual(cache.get("k3"), "val3")
