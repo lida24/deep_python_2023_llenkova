@@ -7,9 +7,9 @@ from bs4 import BeautifulSoup
 async def fetch_url(session, url):
     async with session.get(url) as response:
         html_content = await response.text()
-        soup = BeautifulSoup(html_content, 'html.parser')
-        paragraph = soup.find('p')
-        first_sentence = paragraph.text.strip().split('\n')[0]
+        soup = BeautifulSoup(html_content, "html.parser")
+        paragraph = soup.find("p")
+        first_sentence = paragraph.text.strip().split("\n")[0]
         return first_sentence
 
 
@@ -22,19 +22,21 @@ async def worker(session, queue, tasks):
             task = fetch_url(session, url)
             tasks.append(task)
         except Exception as e:
-            print(f'Failed to fetch {url}, {str(e)}')
+            print(f"Failed to fetch {url}, {str(e)}")
         queue.task_done()
 
 
 async def process_urls(session, queue, requests, tasks):
-    worker_tasks = [asyncio.create_task(worker(session, queue, tasks)) for _ in range(requests)]
+    worker_tasks = [
+        asyncio.create_task(worker(session, queue, tasks)) for _ in range(requests)
+    ]
     await queue.join()
     for worker_task in worker_tasks:
         worker_task.cancel()
 
 
 def get_urls(urls_file):
-    with open(urls_file, 'r') as file:
+    with open(urls_file, "r") as file:
         for line in file:
             yield line
 
@@ -52,12 +54,12 @@ async def main(requests, urls_file):
 
 def create_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument('number_of_requests', type=int)
-    parser.add_argument('urls_file')
+    parser.add_argument("number_of_requests", type=int)
+    parser.add_argument("urls_file")
     return parser
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     input_parser = create_parser()
     args = input_parser.parse_args()
     number_of_requests = args.number_of_requests
