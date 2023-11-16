@@ -32,3 +32,15 @@ class TestClient(unittest.TestCase):
 
         self.assertIsInstance(urls, Queue)
         self.assertEqual(urls.qsize(), 100)
+
+    @mock.patch('socket.socket')
+    def test_send_requests(self, mock_socket):
+        client = Client("urls.txt", 5)
+        client.urls = mock.MagicMock()
+        client.urls.get.side_effect = ["https://example.com", "https://google.com"]
+
+        client.send_requests()
+        mock_socket.return_value.connect.assert_called_with((client.host, client.port))
+        mock_socket.return_value.send.assert_called_with("https://example.com".encode())
+        mock_socket.return_value.recv.assert_called_with(4096)
+
