@@ -1,8 +1,8 @@
 import time
 import weakref
-from memory_profiler import profile
 import cProfile
 import pstats
+from memory_profiler import profile
 
 
 class RegularClass:
@@ -13,7 +13,7 @@ class RegularClass:
 
 class SlotClass:
     __slots__ = ("a", "b")
-    
+
     def __init__(self, a, b):
         self.a = a
         self.b = b
@@ -61,9 +61,9 @@ def estimate_time(func, *args, **kwargs):
     return result, end_ts - start_ts
 
 
-def evaluate_performance(cls):
+def evaluate_memory_performance(cls):
     print(f"Testing {cls.__name__} ...")
-    instances, create_time  = estimate_time(creating_instances, cls)
+    instances, create_time = estimate_time(creating_instances, cls)
     _, read_time = estimate_time(reading_attributes, instances)
     _, change_time = estimate_time(changing_attributes, instances)
     print(f"Creation time {cls.__name__} : {create_time}")
@@ -71,18 +71,29 @@ def evaluate_performance(cls):
     print(f"Change time {cls.__name__} : {change_time}\n")
 
 
-def main():
-    evaluate_performance(RegularClass)
-    evaluate_performance(SlotClass)
-    evaluate_performance(WeakRefClass)
-
-
-if __name__ == "__main__":
+def evaluate_calls_performance(cls):
     profiler = cProfile.Profile()
     profiler.enable()
-    main()
+    instances, create_time = estimate_time(creating_instances, cls)
+    _, read_time = estimate_time(reading_attributes, instances)
+    _, change_time = estimate_time(changing_attributes, instances)
     profiler.disable()
     stats = pstats.Stats(profiler)
     stats.strip_dirs()
     stats.sort_stats(pstats.SortKey.CUMULATIVE)
+    print(f"Testing {cls.__name__} ...")
     stats.print_stats()
+
+
+def main():
+    evaluate_memory_performance(RegularClass)
+    evaluate_memory_performance(SlotClass)
+    evaluate_memory_performance(WeakRefClass)
+
+    evaluate_calls_performance(RegularClass)
+    evaluate_calls_performance(SlotClass)
+    evaluate_calls_performance(WeakRefClass)
+
+
+if __name__ == "__main__":
+    main()
