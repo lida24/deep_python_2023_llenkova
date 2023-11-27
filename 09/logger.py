@@ -9,7 +9,7 @@ def setup_logger(cmd_arguments):
     stdout_handler = logging.StreamHandler(sys.stdout)
     stdout_handler.setLevel(logging.DEBUG)
     stdout_format = logging.Formatter(
-        "====== %(asctime)s - %(levelname)s - %(name)s - %(message)s"
+        "======%(levelname)s - %(message)s"
     )
     stdout_handler.setFormatter(stdout_format)
     file_handler = logging.FileHandler("cache.log")
