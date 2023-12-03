@@ -13,26 +13,26 @@ async def fetch_url(session, url):
         return first_sentence
 
 
-async def worker(session, queue, tasks):
+async def worker(session, queue):
     while True:
         url = await queue.get()
-        if url is None:
-            break
         try:
-            task = fetch_url(session, url)
+            task = await fetch_url(session, url)
             tasks.append(task)
         except Exception as e:
             print(f"Failed to fetch {url}, {str(e)}")
-        queue.task_done()
+        finally:
+            queue.task_done()
 
 
-async def process_urls(session, queue, requests, tasks):
-    worker_tasks = [
-        asyncio.create_task(worker(session, queue, tasks)) for _ in range(requests)
-    ]
-    await queue.join()
-    for worker_task in worker_tasks:
-        worker_task.cancel()
+async def batch_fetch(queue, requests):
+    async with aiohttp.ClientSession() as session:
+        worker_tasks = [
+            asyncio.create_task(worker(session, queue)) for _ in range(requests)
+        ]
+        await queue.join()
+        for worker_task in worker_tasks:
+            worker_task.cancel()
 
 
 def get_urls(urls_file):
@@ -43,13 +43,9 @@ def get_urls(urls_file):
 
 async def main(requests, urls_file):
     queue = asyncio.Queue()
-    tasks = []
-    async with aiohttp.ClientSession() as session:
-        for url in get_urls(urls_file):
-            await queue.put(url)
-        await process_urls(session, queue, requests, tasks)
-        responses = await asyncio.gather(*tasks)
-        print(responses)
+    for url in get_urls(urls_file):
+        await queue.put(url)
+    await batch_fetch(queue, requests)
 
 
 def create_parser():
@@ -60,6 +56,7 @@ def create_parser():
 
 
 if __name__ == "__main__":
+    tasks = []
     input_parser = create_parser()
     args = input_parser.parse_args()
     number_of_requests = args.number_of_requests
