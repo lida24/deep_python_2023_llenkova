@@ -161,13 +161,13 @@ PyObject* cjson_dumps(PyObject* self, PyObject* args) {
         PyObject* key_str = PyObject_Str(key_obj);
         PyObject* value_str = PyObject_Str(value_obj);
         if (key_str != Py_None && value_str != Py_None) {
-            PyObject* format_str;
+            PyObject* key_format_str;
             if (PyLong_Check(key_obj)) {
-                format_str = PyUnicode_FromFormat("%ld: ", PyLong_AsLong(key_obj));
+                key_format_str = PyUnicode_FromFormat("%ld: ", PyLong_AsLong(key_obj));
             } else {
-                format_str = PyUnicode_FromFormat("\"%S:\": ", key_str);
+                key_format_str = PyUnicode_FromFormat("\"%S:\": ", key_str);
             }
-            result = PyUnicode_Concat(result, format_str);
+            result = PyUnicode_Concat(result, key_format_str);
             if (PyLong_Check(value_obj)) {
                 PyObject* value_format_str = PyUnicode_FromFormat("%ld, ", PyLong_AsLong(value_obj));
                 result = PyUnicode_Concat(result, value_format_str);
