@@ -160,28 +160,84 @@ PyObject* cjson_dumps(PyObject* self, PyObject* args) {
     while (PyDict_Next(dict, &pos, &key_obj, &value_obj)) {
         PyObject* key_str = PyObject_Str(key_obj);
         PyObject* value_str = PyObject_Str(value_obj);
-        if (key_str != Py_None && value_str != Py_None) {
+        if (key_str != Py_None && value_str != Py_None && PyUnicode_Check(key_str) && PyUnicode_Check(value_str)) {
             PyObject* key_format_str;
             if (PyLong_Check(key_obj)) {
                 key_format_str = PyUnicode_FromFormat("%ld: ", PyLong_AsLong(key_obj));
             } else {
                 key_format_str = PyUnicode_FromFormat("\"%S:\": ", key_str);
             }
-            result = PyUnicode_Concat(result, key_format_str);
+            if (key_format_str == NULL) {
+                Py_DECREF(result);
+                Py_DECREF(key_str);
+                Py_DECREF(value_str);
+                return NULL;
+            }
+            PyObject* temp_result = PyUnicode_Concat(result, key_format_str);
+            Py_DECREF(result);
+            if (temp_result == NULL) {
+                Py_DECREF(key_str);
+                Py_DECREF(value_str);
+                return NULL;
+            }
+            result = temp_result;
             if (PyLong_Check(value_obj)) {
                 PyObject* value_format_str = PyUnicode_FromFormat("%ld, ", PyLong_AsLong(value_obj));
-                result = PyUnicode_Concat(result, value_format_str);
+                if (value_format_str == NULL) {
+                    Py_DECREF(key_str);
+                    Py_DECREF(value_str);
+                    Py_DECREF(result);
+                    return NULL;
+                }
+                temp_result = PyUnicode_Concat(result, value_format_str);
+                Py_DECREF(result);
+                Py_DECREF(value_format_str);
+                if (temp_result == NULL) {
+                    Py_DECREF(key_str);
+                    Py_DECREF(value_str);
+                    return NULL;
+                }
+                result = temp_result;
             } else {
                 PyObject* value_format_str = PyUnicode_FromFormat("\"%S\": ", value_str);
-                result = PyUnicode_Concat(result, value_format_str);
+                if (value_format_str == NULL) {
+                    Py_DECREF(key_str);
+                    Py_DECREF(value_str);
+                    Py_DECREF(result);
+                    return NULL;
+                }
+                temp_result = PyUnicode_Concat(result, value_format_str);
+                Py_DECREF(result);
+                Py_DECREF(value_format_str);
+                if (temp_result == NULL) {
+                    Py_DECREF(key_str);
+                    Py_DECREF(value_str);
+                    return NULL;
+                }
+                result = temp_result;
             }
+            Py_DECREF(key_str);
+            Py_DECREF(value_str);
         }
     }
     Py_ssize_t len = PyUnicode_GetLength(result);
     PyObject* new_result = PyUnicode_Substring(result, 0, len - 2);
+    if (new_result == NULL) {
+        Py_DECREF(result);
+        return NULL;
+    }
     PyObject* format_str = PyUnicode_FromString("}");
-    new_result =  PyUnicode_Concat(new_result, format_str);
-    return new_result;
+    if (format_str == NULL) {
+        Py_DECREF(result);
+        Py_DECREF(new_result);
+        return NULL;
+    }
+    PyObject* final_result = PyUnicode_Concat(new_result, format_str);
+    if (final_result == NULL) {
+        Py_DECREF(result);
+        return NULL;
+    }
+    return final_result;
 }
 
 static PyMethodDef methods[] = {
