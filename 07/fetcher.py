@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 
 
 async def fetch_url(session, url):
-    async with session.get(url) as response:
+    async with session.get(url, timeout=10) as response:
         html_content = await response.text()
         soup = BeautifulSoup(html_content, "html.parser")
         paragraph = soup.find("p")
