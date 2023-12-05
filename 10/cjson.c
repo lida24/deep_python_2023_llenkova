@@ -175,56 +175,81 @@ PyObject* cjson_loads(PyObject* self, PyObject* args) {
     return dict;
 }
 
-PyObject* cjson_dumps(PyObject* self, PyObject* args) {
-    PyObject* dict;
-    if (!PyArg_ParseTuple(args, "O", &dict)) {
-        PyErr_SetString(PyExc_TypeError, "Expected a dictionary argument");
-        return NULL;
-    }
-    if (!PyDict_Check(dict)) {
-        PyErr_SetString(PyExc_TypeError, "Expected a dictionary");
-        return NULL;
-    }
-    PyObject *json_dict = PyDict_New();
-    if (json_dict == NULL) {
-        PyErr_SetString(PyExc_RuntimeError, "Failed to create Dict Object");
+PyObject* cjson_dumps(PyObject* self, PyObject* args)
+{
+    PyObject* my_dict;
+
+    if (!PyArg_ParseTuple(args, "O", &my_dict)) {
         return NULL;
     }
     PyObject* key_obj;
     PyObject* value_obj;
     Py_ssize_t pos = 0;
-    while (PyDict_Next(dict, &pos, &key_obj, &value_obj)) {
-        const char *key_str = PyUnicode_AsUTF8(key_obj);
-        char *escaped_key = json_escape(key_str);
 
-        const char *value_str = PyUnicode_AsUTF8(value_obj);
-        char *escaped_value = json_escape(value_str);
+    PyObject *result = PyUnicode_FromString("{");
 
-        PyObject* py_key = Py_BuildValue("s", escaped_key);
-        PyObject* py_value = Py_BuildValue("s", escaped_value);
+    PyObject *key_str_p = Py_None;
+    PyObject *value_str_p = Py_None;
+    bool key_is_int = false;
+    bool value_is_int = false;
 
-        if (PyDict_SetItem(json_dict, py_key, py_value) < 0) {
-            PyErr_SetString(PyExc_RuntimeError, "Failed to set item in dictionary");
-            Py_DECREF(json_dict);
-            Py_DECREF(py_key);
-            Py_DECREF(py_value);
-            free(escaped_key);
-            free(escaped_value);
-            return NULL;
+    while (PyDict_Next(my_dict, &pos, &key_obj, &value_obj)) {
+
+        key_str_p = Py_None;
+        value_str_p = Py_None;
+
+        key_is_int = false;
+        value_is_int = false;
+
+
+        if (PyLong_Check(key_obj)) {
+
+            key_str_p = PyObject_Str(key_obj);
+
+
+        } else {
+
+            key_str_p = PyObject_Str(key_obj);
+
         }
-        Py_DECREF(py_key);
-        Py_DECREF(py_value);
+
+        if (PyLong_Check(value_obj)) {
+            value_str_p = PyLong_AsLong(value_obj);
+            value_is_int = true;
+        } else {
+            value_str_p = PyObject_Str(value_obj);
+        }
+
+        if (value_str_p != Py_None && key_str_p != Py_None) {
+            if (key_is_int && value_is_int) {
+                PyObject *format_str = PyUnicode_FromFormat("%ld: %ld, ", key_str_p, value_str_p);
+                result = PyUnicode_Concat(result, format_str);
+            }
+            else if (key_is_int && !value_is_int) {
+                PyObject *format_str = PyUnicode_FromFormat("%ld: \"%S\", ", key_str_p, value_str_p);
+                result = PyUnicode_Concat(result, format_str);
+            }
+            else if (!key_is_int && value_is_int) {
+                PyObject *format_str = PyUnicode_FromFormat("\"%S\": %ld, ", key_str_p, value_str_p);
+                result = PyUnicode_Concat(result, format_str);
+
+            } else {
+                PyObject *format_str = PyUnicode_FromFormat("\"%S\": \"%S\", ", key_str_p, value_str_p);
+                result = PyUnicode_Concat(result, format_str);
+
+            }
+
+        }
     }
-    PyObject* json_string = PyObject_Str(json_dict);
-    Py_DECREF(json_dict);
-    if (json_string == NULL) {
-        PyErr_SetString(PyExc_RuntimeError, "Failed to convert dictionary to JSON string");
-        return NULL;
-    }
-    const char *json_str = PyUnicode_AsUTF8(json_string);
-    PyObject* result = Py_BuildValue("s", json_str);
-    Py_DECREF(json_string);
-    return result;
+
+    Py_ssize_t length = PyUnicode_GetLength(result);
+    PyObject *new_result = PyUnicode_Substring(result, 0, length - 2);
+
+    PyObject *format_str = PyUnicode_FromString("}");
+    new_result = PyUnicode_Concat(new_result, format_str);
+
+
+    return new_result;
 }
 
 static PyMethodDef methods[] = {
