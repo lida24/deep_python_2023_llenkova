@@ -163,9 +163,9 @@ PyObject* cjson_dumps(PyObject* self, PyObject* args) {
         if (key_str != Py_None && value_str != Py_None && PyUnicode_Check(key_str) && PyUnicode_Check(value_str)) {
             PyObject* key_format_str;
             if (PyLong_Check(key_obj)) {
-                key_format_str = PyUnicode_FromFormat("%ld: ", PyLong_AsLong(key_obj));
+                key_format_str = PyUnicode_FromFormat("%ld ", PyLong_AsLong(key_obj));
             } else {
-                key_format_str = PyUnicode_FromFormat("\"%S:\": ", key_str);
+                key_format_str = PyUnicode_FromFormat("\"%S\"", key_str);
             }
             if (key_format_str == NULL) {
                 Py_DECREF(result);
@@ -182,7 +182,7 @@ PyObject* cjson_dumps(PyObject* self, PyObject* args) {
             }
             result = temp_result;
             if (PyLong_Check(value_obj)) {
-                PyObject* value_format_str = PyUnicode_FromFormat("%ld, ", PyLong_AsLong(value_obj));
+                PyObject* value_format_str = PyUnicode_FromFormat(": %ld, ", PyLong_AsLong(value_obj));
                 if (value_format_str == NULL) {
                     Py_DECREF(key_str);
                     Py_DECREF(value_str);
@@ -199,7 +199,7 @@ PyObject* cjson_dumps(PyObject* self, PyObject* args) {
                 }
                 result = temp_result;
             } else {
-                PyObject* value_format_str = PyUnicode_FromFormat("\"%S\": ", value_str);
+                PyObject* value_format_str = PyUnicode_FromFormat(": \"%S\", ", value_str);
                 if (value_format_str == NULL) {
                     Py_DECREF(key_str);
                     Py_DECREF(value_str);
