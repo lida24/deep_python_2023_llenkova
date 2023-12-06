@@ -31,6 +31,7 @@ class Client:
         while True:
             url = url_queue.get()
             if url is None:
+                url_queue.put(url)
                 break
             with self.get_client_socket() as sock:
                 try:
@@ -46,14 +47,16 @@ class Client:
         urls = list(self.get_urls())
         url_queue = Queue()
         result_queue = Queue()
-        for url in urls:
-            url_queue.put(url)
         client_threads = [
             threading.Thread(target=self.send_requests, args=(url_queue, result_queue))
             for _ in range(self.number_of_threads)
         ]
         for thread in client_threads:
             thread.start()
+
+        for url in urls:
+            url_queue.put(url)
+        url_queue.put(None)
 
         for thread in client_threads:
             thread.join()

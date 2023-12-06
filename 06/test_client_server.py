@@ -43,4 +43,3 @@ class TestClient(unittest.TestCase):
         mock_socket.return_value.connect.assert_called_with((client.host, client.port))
         mock_socket.return_value.send.assert_called_with("https://example.com".encode())
         mock_socket.return_value.recv.assert_called_with(4096)
-
