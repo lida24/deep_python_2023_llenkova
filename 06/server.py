@@ -1,5 +1,6 @@
 import json
 import socket
+import sys
 import threading
 import argparse
 import requests
@@ -13,14 +14,18 @@ class URLProcess:
         self.k_words = k_words
 
     def process(self):
-        response = requests.get(self.url)
-        soup = BeautifulSoup(response.text, 'html.parser')
-        words = soup.get_text().split()
-        words = Counter(words).most_common(self.k_words)
-        most_common_words = {}
-        for key, value in words:
-            most_common_words[key] = value
-        return most_common_words, self.url
+        try:
+            response = requests.get(self.url)
+            if response.status_code == 200:
+                soup = BeautifulSoup(response.text, "html.parser")
+                words = soup.get_text().split()
+                words = Counter(words).most_common(self.k_words)
+                most_common_words = {key: value for key, value in words}
+                return most_common_words, self.url
+            else:
+                raise Exception(f"Received status code {response.status_code}")
+        except Exception as e:
+            print(f"Error occurred on server side while processing url {self.url}: {e}")
 
 
 class Worker(threading.Thread):
@@ -40,10 +45,21 @@ class Worker(threading.Thread):
             url = data.decode().strip()
             if self.lock.locked():
                 self.lock.release()
+            if not url:
+                continue
             url_process = URLProcess(url, self.k_words)
-            most_common_words, processed_url = url_process.process()
-            self.client_socket.send(json.dumps(f'{processed_url}: {most_common_words}', ensure_ascii=False).encode())
-            self.server.print_statistics(self.lock)
+            try:
+                result = url_process.process()
+                if result:
+                    most_common_words, processed_url = result
+                    self.client_socket.send(
+                        json.dumps(
+                            f"{processed_url}: {most_common_words}", ensure_ascii=False
+                        ).encode()
+                    )
+                    self.server.print_statistics(self.lock)
+            except Exception as e:
+                print(f"Error occurred on server side while running {url}: {e}")
 
 
 class Server:
@@ -58,35 +74,43 @@ class Server:
 
     def start(self):
         threads = []
-        self.sock.bind((self.host, self.port))
-        self.sock.listen(self.workers_count)
-        for i in range(self.workers_count):
-            client_socket, _ = self.sock.accept()
-            thread = Worker(self, i + 1, client_socket, self.k_words, self.lock)
-            thread.start()
-            threads.append(thread)
-        for thread in threads:
-            thread.join()
+        try:
+            self.sock.bind((self.host, self.port))
+            self.sock.listen(self.workers_count)
+            while True:
+                client_socket, _ = self.sock.accept()
+                thread = Worker(
+                    self, len(threads) + 1, client_socket, self.k_words, self.lock
+                )
+                thread.start()
+                threads.append(thread)
+        except Exception as e:
+            print(f"Error occurred while starting the server: {e}")
 
     def print_statistics(self, lock):
         if not lock.locked():
             lock.acquire()
         self.processed_urls_counter += 1
         lock.release()
-        print(f'Обработано {self.processed_urls_counter} урлов')
+        print(f"Processed {self.processed_urls_counter} urls")
 
 
 def create_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-w', type=int)
-    parser.add_argument('-k', type=int)
+    parser.add_argument("-w", type=int)
+    parser.add_argument("-k", type=int)
     return parser
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     input_parser = create_parser()
     args = input_parser.parse_args()
+    if not (args.w and args.k):
+        print("Please provide values for both -w and -k arguments")
     workers = args.w
     top_k = args.k
-    server = Server(workers, top_k)
-    server.start()
+    try:
+        server = Server(workers, top_k)
+        server.start()
+    except Exception as e:
+        print(f"Error occurred while creating the server: {e}")

@@ -8,28 +8,50 @@ class Client:
     def __init__(self, file, number_of_threads):
         self.host = socket.gethostname()
         self.port = 8080
-        self.urls = self.get_urls(file)
+        self.file = file
         self.number_of_threads = number_of_threads
 
-    @staticmethod
-    def get_urls(file):
-        queue_of_urls = Queue()
-        with open(file, 'r') as file:
-            for line in file:
-                queue_of_urls.put(line.strip())
-        return queue_of_urls
+    def get_urls(self):
+        try:
+            with open(self.file, "r") as file:
+                for line in file:
+                    yield line.strip()
+        except FileNotFoundError:
+            print(f"File {self.file} not found")
 
-    def send_requests(self):
+    def get_client_socket(self):
         sock = socket.socket()
-        sock.connect((self.host, self.port))
+        try:
+            sock.connect((self.host, self.port))
+            return sock
+        except Exception as e:
+            print(f"Error occurred on client side while connecting to the server: {e}")
+
+    def send_requests(self, url_queue, result_queue):
         while True:
-            url = self.urls.get()
-            sock.send(url.encode())
-            data = sock.recv(4096).decode()
-            print(data)
+            url = url_queue.get()
+            if url is None:
+                break
+            with self.get_client_socket() as sock:
+                try:
+                    sock.send(url.encode())
+                    data = sock.recv(4096).decode()
+                    if data:
+                        result_queue.put((url, data))
+                        print(f"{url}: {data}")
+                except Exception as e:
+                    print(f"Error occurred on client side while processing url {url}: {e}")
 
     def run(self):
-        client_threads = [threading.Thread(target=self.send_requests) for _ in range(self.number_of_threads)]
+        urls = list(self.get_urls())
+        url_queue = Queue()
+        result_queue = Queue()
+        for url in urls:
+            url_queue.put(url)
+        client_threads = [
+            threading.Thread(target=self.send_requests, args=(url_queue, result_queue))
+            for _ in range(self.number_of_threads)
+        ]
         for thread in client_threads:
             thread.start()
 
@@ -39,12 +61,12 @@ class Client:
 
 def create_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument('threads', type=int)
-    parser.add_argument('urls_file')
+    parser.add_argument("threads", type=int)
+    parser.add_argument("urls_file")
     return parser
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     input_parser = create_parser()
     args = input_parser.parse_args()
     urls_file = args.urls_file
